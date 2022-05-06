@@ -1,6 +1,7 @@
 const dataUrl = 'http://localhost:3000/quotes?_embed=likes'
 const data = "http://localhost:3000/quotes"
 const quoteList = document.getElementById('quote-list')
+const likesUrl = 'http://localhost:3000/likes'
 
 function renderData() {
     fetch(dataUrl).then(res=>res.json()).then(data=> {
@@ -29,18 +30,39 @@ function createQuote(quote) {
     likeBtn.className = 'btn-success'
     likeBtn.textContent = "Likes: "
     const span = document.createElement('span')
-    span.textContent = 0
+    span.textContent = quote.likes.length
     likeBtn.append(span)
+    likeBtn.addEventListener('click', (e)=> {
+        console.log(e)
+        console.log(`${likesUrl}`)
+        fetch(likesUrl, {
+            method: "POST",
+            headers: {
+                "Content-type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify(
+                {
+                quoteID: quote.id
+            }
+            )}).then(res => res.json()).then(data => {
+                console.log(data)
+                span.textContent++
+            })
+})
+    
     const deleteBtn = document.createElement('button')
     deleteBtn.className = 'btn-danger'
     deleteBtn.textContent = "DELETE"
     deleteBtn.addEventListener('click', (e) => {
         console.log(e)
+        
+        //console.log(`${data}/${quote.id}`)
         fetch(`${data}/${quote.id}`, {
             method: "DELETE"
         }).then(res=> res.json()).then(data => {
             console.log(data)
-            //document.querySelector(`li#${quote.id}`).remove()
+            li.remove()
         })
     })
 
@@ -59,22 +81,25 @@ function handleForm() {
     console.log(newQuoteAuthor)
     const newQuoteObj = {
         quote: newQuote,
-        author: newQuoteAuthor
-    }
+        author: newQuoteAuthor}
     fetch(data, {
         method: "POST",
         headers: {
             "Content-type": "application/json",
             "Accept": "application/json"
         },
-        body: JSON.stringify(newQuoteObj)
+        body: JSON.stringify(
+            newQuoteObj
+            //{
+            //quote: `${newQuote}`,
+            //author: `${newQuoteAuthor}`}
+            )
     }).then(res => res.json()).then(data=> {
         console.log(data)
         quoteList.append(createQuote(newQuoteObj))
-    })
+     })
     })
 }
-
 
   function DOMLoaded() {
       document.addEventListener("DOMContentLoaded", ()=>{
